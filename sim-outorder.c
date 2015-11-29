@@ -110,7 +110,7 @@ static int ruu_branch_penalty;
 /* speed of front-end of machine relative to execution core */
 static int fetch_speed;
 
-/* branch predictor type {nottaken|taken|perfect|bimod|2lev} */
+/* branch predictor type {nottaken|taken|perfect|bimod|2lev|1bit} */
 static char *pred_type;
 
 /* bimodal predictor config (<table_size>) */
