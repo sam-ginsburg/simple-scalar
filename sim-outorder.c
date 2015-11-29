@@ -930,6 +930,26 @@ sim_check_options(struct opt_odb_t *odb,        /* options database */
                           /* btb assoc */btb_config[1],
                           /* ret-addr stack size */ras_size);
     }
+  else if (!mystricmp(pred_type, "1bit"))
+    {
+      /* 1bit predictor, bpred_create() checks BTB_SIZE */
+      if (bimod_nelt != 1)
+        fatal("bad 1bit predictor config (<table_size>)");
+      if (btb_nelt != 2)
+        fatal("bad btb config (<num_sets> <associativity>)");
+
+      /* bimodal predictor, bpred_create() checks BTB_SIZE */
+      pred = bpred_create(BPred1bit,
+                          /* bimod table size */bimod_config[0],
+                          /* 2lev l1 size */0,
+                          /* 2lev l2 size */0,
+                          /* meta table size */0,
+                          /* history reg size */0,
+                          /* history xor address */0,
+                          /* btb sets */btb_config[0],
+                          /* btb assoc */btb_config[1],
+                          /* ret-addr stack size */ras_size);
+    }
   else if (!mystricmp(pred_type, "2lev"))
     {
       /* 2-level adaptive predictor, bpred_create() checks args */

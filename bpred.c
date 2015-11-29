@@ -108,6 +108,15 @@ bpred_create(enum bpred_class class,    /* type of predictor to create */
     pred->dirpred.bimod = 
       bpred_dir_create(class, bimod_size, 0, 0, 0);
 
+      break;
+
+  case BPred1bit:
+  /* we re-use the bimodal table size here */
+    pred->dirpred.bimod = 
+      bpred_dir_create(class, bimod_size, 0, 0, 0);
+
+      break;
+
   case BPredTaken:
   case BPredNotTaken:
     /* no other state */
@@ -251,6 +260,23 @@ bpred_dir_create (
 
     break;
 
+  case BPred1bit:
+    if (!l1size || (l1size & (l1size-1)) != 0)
+      fatal("1bit table size, `%d', must be non-zero and a power of two", l1size);
+    pred_dir->config.bimod.size = l1size;
+    if (!(pred_dir->config.bimod.table =
+          calloc(l1size, sizeof(unsigned char))))
+      fatal("cannot allocate 1bit storage");
+    /* initialize counters to this-or-that */
+    flipflop = 1;
+    for (cnt = 0; cnt < l1size; cnt++)
+      {
+        pred_dir->config.bimod.table[cnt] = flipflop;
+        flipflop = 1 - flipflop;
+      }
+
+    break;
+
   case BPredTaken:
   case BPredNotTaken:
     /* no other state */
@@ -280,6 +306,11 @@ bpred_dir_config(
 
   case BPred2bit:
     fprintf(stream, "pred_dir: %s: 2-bit: %d entries, direct-mapped\n",
+      name, pred_dir->config.bimod.size);
+    break;
+
+  case BPred1bit:
+    fprintf(stream, "pred_dir: %s: 1-bit: %d entries, direct-mapped\n",
       name, pred_dir->config.bimod.size);
     break;
 
@@ -320,6 +351,13 @@ bpred_config(struct bpred_t *pred,      /* branch predictor instance */
 
   case BPred2bit:
     bpred_dir_config (pred->dirpred.bimod, "bimod", stream);
+    fprintf(stream, "btb: %d sets x %d associativity", 
+            pred->btb.sets, pred->btb.assoc);
+    fprintf(stream, "ret_stack: %d entries", pred->retstack.size);
+    break;
+
+  case BPred1bit:
+    bpred_dir_config (pred->dirpred.bimod, "1bit", stream);
     fprintf(stream, "btb: %d sets x %d associativity", 
             pred->btb.sets, pred->btb.assoc);
     fprintf(stream, "ret_stack: %d entries", pred->retstack.size);
@@ -366,6 +404,9 @@ bpred_reg_stats(struct bpred_t *pred,   /* branch predictor instance */
       break;
     case BPred2bit:
       name = "bpred_bimod";
+      break;
+    case BPred1bit:
+      name = "bpred_1bit";
       break;
     case BPredTaken:
       name = "bpred_taken";
@@ -533,6 +574,9 @@ bpred_dir_lookup(struct bpred_dir_t *pred_dir,  /* branch dir predictor inst */
     case BPred2bit:
       p = &pred_dir->config.bimod.table[BIMOD_HASH(pred_dir, baddr)];
       break;
+    case BPred1bit:
+      p = &pred_dir->config.bimod.table[BIMOD_HASH(pred_dir, baddr)];
+      break;
     case BPredTaken:
     case BPredNotTaken:
       break;
@@ -610,6 +654,13 @@ bpred_lookup(struct bpred_t *pred,      /* branch predictor instance */
         }
       break;
     case BPred2bit:
+      if ((MD_OP_FLAGS(op) & (F_CTRL|F_UNCOND)) != (F_CTRL|F_UNCOND))
+        {
+          dir_update_ptr->pdir1 =
+            bpred_dir_lookup (pred->dirpred.bimod, baddr);
+        }
+      break;
+    case BPred1bit:
       if ((MD_OP_FLAGS(op) & (F_CTRL|F_UNCOND)) != (F_CTRL|F_UNCOND))
         {
           dir_update_ptr->pdir1 =
