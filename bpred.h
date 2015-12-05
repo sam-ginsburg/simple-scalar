@@ -136,7 +136,7 @@ struct bpred_dir_t {
       int l2size;               /* level-2 size, number of pred states */
       int shift_width;          /* amount of history in level-1 shift regs */
       int xor;                  /* history xor address flag */
-      int *shiftregs;           /* level-1 history table */
+      long long int *shiftregs;           /* level-1 history table */
       unsigned char *l2table;   /* level-2 prediction state table */
       signed char *l2table_gehl;  /* level-2 prediction state table for gehl predictor */
       int is_gehl;              /* flag marking if this predictor is part of a larger gehl predictor */
@@ -147,7 +147,7 @@ struct bpred_dir_t {
       int hist_width;           /* amount of history in BHR shift regs */
       int weight_width;         /* width of perceptron weight coefficicents (should be hist_width + 1) */
       int xor;                  /* history xor address flag */
-      int *histregs;            /* branch history regs table */
+      long long int *histregs;            /* branch history regs table */
       signed char **percepttable;       /* perceptron table */
     } percept;
   } config;
@@ -206,7 +206,7 @@ struct bpred_update_t {
   char *pdir1;          /* direction-1 predictor counter */
   char *pdir2;          /* direction-2 predictor counter */
   char *pmeta;          /* meta predictor counter */
-  int  *input_snapshot;  /* snapshot of the history input at the time of the prediction for use in perceptron tratining */
+  long long int  *input_snapshot;  /* snapshot of the history input at the time of the prediction for use in perceptron tratining */
   char *pdirgehl0;          /* gehl-0 direction predictor counter */
   char *pdirgehl1;          /* gehl-1 direction predictor counter */
   char *pdirgehl2;          /* gehl-2 direction predictor counter */

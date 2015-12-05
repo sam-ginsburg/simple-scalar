@@ -261,7 +261,7 @@ bpred_dir_create (
       pred_dir->config.two.shift_width = shift_width;
       
       pred_dir->config.two.xor = xor;
-      pred_dir->config.two.shiftregs = calloc(l1size, sizeof(int));
+      pred_dir->config.two.shiftregs = calloc(l1size, sizeof(long long int));
       if (!pred_dir->config.two.shiftregs)
         fatal("cannot allocate shift register table");
       
@@ -305,7 +305,7 @@ bpred_dir_create (
 
       pred_dir->config.percept.xor = xor;
 
-      pred_dir->config.percept.histregs = calloc(l1size, sizeof(int)); /* times 5 for long history */
+      pred_dir->config.percept.histregs = calloc(l1size, sizeof(long long int)); /* times 5 for long history */
       if (!pred_dir->config.percept.histregs)
         fatal("cannot allocate shift register history table");
 
@@ -792,7 +792,7 @@ bpred_dir_lookup(struct bpred_dir_t *pred_dir,  /* branch dir predictor inst */
   switch (pred_dir->class) {
     case BPred2Level:
       {
-        int l1index, l2index;
+        long long int l1index, l2index;
 
         /* traverse 2-level tables */
         l1index = (baddr >> MD_BR_SHIFT) & (pred_dir->config.two.l1size - 1);
@@ -935,7 +935,7 @@ bpred_lookup(struct bpred_t *pred,      /* branch predictor instance */
         {
           dir_update_ptr->pdir1 = bpred_dir_lookup (pred->dirpred.percept, baddr);
 
-          int bhtindex, bhr_entry, input;
+          long long int bhtindex, bhr_entry, input;
           bhtindex = (baddr >> MD_BR_SHIFT) & (pred->dirpred.percept->config.percept.bhtsize - 1);
           bhr_entry = pred->dirpred.percept->config.percept.histregs[bhtindex];
           input = (bhr_entry << 1) | 1;
@@ -1083,7 +1083,7 @@ bpred_lookup(struct bpred_t *pred,      /* branch predictor instance */
 
   /* perceptron prediction for conditional branch */
   if (pred->class == BPredPercept) {
-    int weight_width, bhtindex, bhr_entry, input, temp_bit;
+    long long int weight_width, bhtindex, bhr_entry, input, temp_bit;
     signed char *pweights = (signed char *)(dir_update_ptr->pdir1);
     weight_width = pred->dirpred.percept->config.percept.weight_width;
 
@@ -1289,7 +1289,7 @@ bpred_update(struct bpred_t *pred,      /* branch predictor instance */
   if ((MD_OP_FLAGS(op) & (F_CTRL|F_UNCOND)) != (F_CTRL|F_UNCOND) &&
       (pred->class == BPred2Level || pred->class == BPredComb))
     {
-      int l1index, shift_reg;
+      long long int l1index, shift_reg;
       
       /* also update appropriate L1 history register */
       l1index = (baddr >> MD_BR_SHIFT) & (pred->dirpred.twolev->config.two.l1size - 1);
@@ -1299,7 +1299,7 @@ bpred_update(struct bpred_t *pred,      /* branch predictor instance */
   if ((MD_OP_FLAGS(op) & (F_CTRL|F_UNCOND)) != (F_CTRL|F_UNCOND) &&
       (pred->class == BPredPercept))
     {
-      int l1index, shift_reg;
+      long long int l1index, shift_reg;
       
       /* also update appropriate L1 history register */
       l1index = (baddr >> MD_BR_SHIFT) & (pred->dirpred.percept->config.percept.bhtsize - 1);
@@ -1311,7 +1311,7 @@ bpred_update(struct bpred_t *pred,      /* branch predictor instance */
   if ((MD_OP_FLAGS(op) & (F_CTRL|F_UNCOND)) != (F_CTRL|F_UNCOND) &&
       (pred->class == BPredGehl))
     {
-      int l1index, shift_reg;
+      long long int l1index, shift_reg;
 
       // printf("11 11 11 11 11 11\n");
       
@@ -1446,7 +1446,7 @@ bpred_update(struct bpred_t *pred,      /* branch predictor instance */
   if (dir_update_ptr->pdir1)
     {
       if ((pred->class == BPredPercept) && dir_update_ptr->input_snapshot) {
-        int input_snapshot, weight_width, temp_bit, adj_taken, i;
+        long long int input_snapshot, weight_width, temp_bit, adj_taken, i;
         signed char *pweights = (signed char *)(dir_update_ptr->pdir1);
         input_snapshot = *(dir_update_ptr->input_snapshot);
         weight_width = pred->dirpred.percept->config.percept.weight_width;
